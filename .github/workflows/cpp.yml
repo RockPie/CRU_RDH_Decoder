@@ -1,0 +1,39 @@
+name: C++ build & install test
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+
+jobs:
+  build:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-22.04, macos-13, windows-2022]
+    steps:
+      - uses: actions/checkout@v4
+      - name: Configure
+        run: |
+          cmake -S . -B build -G Ninja -DCMAKE_BUILD_TYPE=Release -DBUILD_PYTHON=OFF
+      - name: Build
+        run: cmake --build build -j
+      - name: Install
+        run: sudo cmake --install build --prefix /usr/local
+      - name: Find-package smoke test
+        run: |
+          cat > test.cpp <<'EOF'
+          #include <binparse/parser.hpp>
+          int main(){ return 0; }
+          EOF
+          cmake -S . -B _t -G Ninja -D CMAKE_BUILD_TYPE=Release \
+                -D CMAKE_PREFIX_PATH=/usr/local
+          cat > CMakeLists.txt <<'EOF'
+          cmake_minimum_required(VERSION 3.20)
+          project(smoke LANGUAGES CXX)
+          find_package(binparse CONFIG REQUIRED)
+          add_executable(smoke test.cpp)
+          target_link_libraries(smoke PRIVATE binparse::binparse)
+          EOF
+          cmake -S . -B _t -G Ninja -D CMAKE_PREFIX_PATH=/usr/local
+          cmake --build _t -j
