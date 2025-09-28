@@ -1,6 +1,6 @@
 # CRU_RDH_Decoder
 
-[![C++ CI](https://github.com/RockPie/CRU_RDH_Decoder/actions/workflows/cpp.yml/badge.svg)](https://github.com/RockPie/CRU_RDH_Decoder/actions/workflows/cpp.yml) [![Build & Publish Wheels](https://github.com/RockPie/CRU_RDH_Decoder/actions/workflows/wheels.yml/badge.svg)](https://github.com/RockPie/CRU_RDH_Decoder/actions/workflows/wheels.yml) [![License](https://img.shields.io/github/license/RockPie/CRU_RDH_Decoder.svg)](LICENSE)
+[![C++ CI](https://github.com/RockPie/CRU_RDH_Decoder/actions/workflows/cpp.yml/badge.svg)](https://github.com/RockPie/CRU_RDH_Decoder/actions/workflows/cpp.yml) [![License](https://img.shields.io/github/license/RockPie/CRU_RDH_Decoder.svg)](LICENSE)
 
 ---
 
@@ -86,13 +86,7 @@ target_link_libraries(your_app PRIVATE binparse::binparse)
 
 ### Installation
 
-Install directly from PyPI:
-
-```bash
-pip install pybinparse
-```
-
-Or build from source:
+Build from source:
 
 ```bash
 pip install scikit-build-core pybind11 ninja build
@@ -170,21 +164,6 @@ Each CI run verifies:
 3. Python wheel build and import test  
 
 See build results in the [Actions tab](https://github.com/RockPie/CRU_RDH_Decoder/actions).
-
----
-
-## 📦 Release Workflow
-
-New releases are published automatically to **PyPI** when you push a version tag:
-
-```bash
-git tag v0.3.0
-git push origin v0.3.0
-```
-
-This triggers both:
-- 📦 C++ build test (`cpp.yml`)
-- 🐍 Python wheel build & upload (`wheels.yml`)
 
 ---
 
