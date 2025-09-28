@@ -1,0 +1,66 @@
+name: Build & publish wheels
+
+on:
+  push:
+    tags: ["v*.*.*"]   # 打 tag 自动发布
+  workflow_dispatch:   # 也可手动触发
+
+jobs:
+  build-wheels:
+    name: Build wheels (${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-22.04, macos-13, windows-2022]
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Build wheels
+        uses: pypa/cibuildwheel@v2.20
+        env:
+          CIBW_BUILD: "cp39-* cp310-* cp311-* cp312-*"
+          CIBW_SKIP: "pp* *-musllinux_*"
+          CIBW_ARCHS_LINUX: "x86_64"
+          CIBW_ARCHS_MACOS: "x86_64 arm64 universal2"
+          CIBW_ARCHS_WINDOWS: "AMD64"
+          CIBW_BEFORE_BUILD: "python -m pip install -U pip pybind11 scikit-build-core ninja"
+          CIBW_ENVIRONMENT: >
+            CMAKE_GENERATOR="Ninja"
+        with:
+          package-dir: .
+          output-dir: wheelhouse
+
+      - name: Build sdist
+        run: |
+          python -m pip install -U build
+          python -m build --sdist
+          mkdir -p wheelhouse
+          mv dist/*.tar.gz wheelhouse/
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: wheels
+          path: wheelhouse/*
+
+  publish:
+    needs: build-wheels
+    runs-on: ubuntu-22.04
+    if: startsWith(github.ref, 'refs/tags/v')  # 只有打 tag 才发布
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: wheels
+          path: dist
+      - name: Publish to PyPI
+        uses: pypa/gh-action-pypi-publish@v1.10.3
+        with:
+          packages-dir: dist
+          password: ${{ secrets.PYPI_API_TOKEN }}
+          verbose: true

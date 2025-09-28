@@ -1,0 +1,27 @@
+[build-system]
+requires = ["scikit-build-core>=0.7.0", "pybind11>=2.12.0", "ninja"]
+build-backend = "scikit_build_core.build"
+
+[project]
+name = "pybinparse"
+version = "0.3.0"
+description = "Python bindings for binparse (C++ streaming binary parser)"
+readme = "README.md"
+license = { file = "LICENSE" }
+authors = [{ name = "Your Name", email = "you@example.com" }]
+requires-python = ">=3.9"
+classifiers = [
+  "Programming Language :: Python :: 3",
+  "Programming Language :: C++",
+  "Operating System :: MacOS :: MacOS X",
+  "Operating System :: POSIX :: Linux",
+  "Operating System :: Microsoft :: Windows",
+]
+
+[project.urls]
+Homepage = "https://github.com/you/binparse"
+
+[tool.scikit-build]
+build-dir = "build/{wheel_tag}"
+wheel.expand-macos-universal-tags = true
+cmake.args = ["-DBUILD_PYTHON=ON", "-DCMAKE_BUILD_TYPE=Release"]

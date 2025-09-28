@@ -1,0 +1,101 @@
+# ==============================
+# General build artifacts
+# ==============================
+build/
+_build*/
+cmake-build-*/
+CMakeFiles/
+CMakeCache.txt
+CMakeScripts/
+Makefile
+cmake_install.cmake
+compile_commands.json
+Testing/
+CTestTestfile.cmake
+data/
+
+# Ninja / MSVC
+*.ninja
+*.obj
+*.pdb
+*.ilk
+*.exe
+*.dll
+*.lib
+*.exp
+*.app
+*.dSYM/
+*.a
+*.o
+*.so
+*.dylib
+
+# ==============================
+# Python build / packaging
+# ==============================
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.egg-info/
+*.egg
+.eggs/
+dist/
+wheelhouse/
+*.whl
+*.log
+pip-wheel-metadata/
+.env/
+.venv/
+venv/
+env/
+venv*/
+build_env*/
+.pytest_cache/
+.mypy_cache/
+coverage.xml
+htmlcov/
+.tox/
+*.cover
+*.coverage
+*.tmp
+
+# ==============================
+# IDE / Editor files
+# ==============================
+.vscode/
+.idea/
+*.swp
+*.swo
+*.sublime-workspace
+*.sublime-project
+
+# macOS / Windows system files
+.DS_Store
+.AppleDouble
+.Trashes
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+
+# ==============================
+# Documentation / temp exports
+# ==============================
+docs/_build/
+*.pdf
+*.aux
+*.log
+*.out
+*.toc
+*.snm
+*.nav
+
+# ==============================
+# Local test data / outputs
+# ==============================
+data/*.bin
+data/*.raw
+*.tmp.bin
+*.dat
+*.out
+*.hexdump
