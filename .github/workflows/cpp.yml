@@ -4,30 +4,39 @@ on:
   push:
     branches: [ main ]
   pull_request:
+  workflow_dispatch:
 
 jobs:
-  build:
-    runs-on: ${{ matrix.os }}
-    strategy:
-      matrix:
-        os: [ubuntu-22.04, macos-13, windows-2022]
+  linux:
+    name: Linux (GCC 13 + Ninja)
+    runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v4
+
+      - name: Install deps (GCC 13 + Ninja)
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y g++-13 ninja-build
+
       - name: Configure
         run: |
-          cmake -S . -B build -G Ninja -DCMAKE_BUILD_TYPE=Release -DBUILD_PYTHON=OFF
+          cmake -S . -B build -G Ninja \
+            -DCMAKE_BUILD_TYPE=Release \
+            -DCMAKE_CXX_COMPILER=g++-13 \
+            -DBUILD_PYTHON=OFF
+
       - name: Build
         run: cmake --build build -j
+
       - name: Install
         run: sudo cmake --install build --prefix /usr/local
+
       - name: Find-package smoke test
         run: |
           cat > test.cpp <<'EOF'
           #include <binparse/parser.hpp>
           int main(){ return 0; }
           EOF
-          cmake -S . -B _t -G Ninja -D CMAKE_BUILD_TYPE=Release \
-                -D CMAKE_PREFIX_PATH=/usr/local
           cat > CMakeLists.txt <<'EOF'
           cmake_minimum_required(VERSION 3.20)
           project(smoke LANGUAGES CXX)
@@ -35,5 +44,85 @@ jobs:
           add_executable(smoke test.cpp)
           target_link_libraries(smoke PRIVATE binparse::binparse)
           EOF
-          cmake -S . -B _t -G Ninja -D CMAKE_PREFIX_PATH=/usr/local
+          cmake -S . -B _t -G Ninja -DCMAKE_BUILD_TYPE=Release -DCMAKE_PREFIX_PATH=/usr/local
           cmake --build _t -j
+
+  macos:
+    name: macOS (AppleClang + Ninja)
+    runs-on: macos-13
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Ninja
+        run: |
+          brew update
+          brew install ninja
+
+      - name: Configure
+        run: |
+          cmake -S . -B build -G Ninja \
+            -DCMAKE_BUILD_TYPE=Release \
+            -DBUILD_PYTHON=OFF
+
+      - name: Build
+        run: cmake --build build -j
+
+      - name: Install
+        run: sudo cmake --install build --prefix /usr/local
+
+      - name: Find-package smoke test
+        run: |
+          cat > test.cpp <<'EOF'
+          #include <binparse/parser.hpp>
+          int main(){ return 0; }
+          EOF
+          cat > CMakeLists.txt <<'EOF'
+          cmake_minimum_required(VERSION 3.20)
+          project(smoke LANGUAGES CXX)
+          find_package(binparse CONFIG REQUIRED)
+          add_executable(smoke test.cpp)
+          target_link_libraries(smoke PRIVATE binparse::binparse)
+          EOF
+          cmake -S . -B _t -G Ninja -DCMAKE_BUILD_TYPE=Release -DCMAKE_PREFIX_PATH=/usr/local
+          cmake --build _t -j
+
+  windows:
+    name: Windows (VS 2022)
+    runs-on: windows-2022
+    steps:
+      - uses: actions/checkout@v4
+
+      # 用 VS 生成器，避免 cl+Ninja 的环境初始化问题
+      - name: Configure (VS 2022)
+        shell: pwsh
+        run: |
+          cmake -S . -B build -G "Visual Studio 17 2022" -A x64 `
+            -DCMAKE_BUILD_TYPE=Release `
+            -DBUILD_PYTHON=OFF
+
+      - name: Build
+        shell: pwsh
+        run: cmake --build build --config Release -j
+
+      - name: Install
+        shell: pwsh
+        run: cmake --install build --config Release --prefix "C:/local/binparse"
+
+      - name: Find-package smoke test
+        shell: pwsh
+        run: |
+          @'
+          #include <binparse/parser.hpp>
+          int main(){ return 0; }
+          '@ | Out-File -FilePath test.cpp -Encoding ascii
+
+          @'
+          cmake_minimum_required(VERSION 3.20)
+          project(smoke LANGUAGES CXX)
+          find_package(binparse CONFIG REQUIRED)
+          add_executable(smoke test.cpp)
+          target_link_libraries(smoke PRIVATE binparse::binparse)
+          '@ | Out-File -FilePath CMakeLists.txt -Encoding ascii
+
+          cmake -S . -B _t -G "Visual Studio 17 2022" -A x64 -DCMAKE_BUILD_TYPE=Release -DCMAKE_PREFIX_PATH="C:/local/binparse"
+          cmake --build _t --config Release -j
