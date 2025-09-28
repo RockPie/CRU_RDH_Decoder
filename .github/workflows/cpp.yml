@@ -9,51 +9,45 @@ on:
 jobs:
   linux:
     name: Linux (GCC 13 + Ninja)
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     steps:
-        - uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-        - name: Install deps (GCC 13 + Ninja)
-            # 避免交互/重启提示，且不装推荐包，体积小、失败率低
-          run: |
-            export DEBIAN_FRONTEND=noninteractive
-            sudo apt-get update
-            sudo apt-get install -y --no-install-recommends g++-13 ninja-build
-            which g++-13
-            g++-13 --version
-            ninja --version
+      - name: Install Ninja
+        run: |
+          export DEBIAN_FRONTEND=noninteractive
+          sudo apt-get update -yq
+          sudo apt-get install -yq --no-install-recommends ninja-build
 
-        - name: Configure (use GCC 13)
-          env:
-            CC:  gcc-13        # 用环境变量告诉 CMake
-            CXX: g++-13
-          run: |
-            echo "Using CXX at: $(which ${CXX})"
-            cmake -S . -B build -G Ninja \
-            -DCMAKE_BUILD_TYPE=Release \
-            -DBUILD_PYTHON=OFF
+      - name: Configure
+        env:
+          CC:  gcc
+          CXX: g++
+        run: |
+          g++ --version
+          cmake -S . -B build -G Ninja -DCMAKE_BUILD_TYPE=Release -DBUILD_PYTHON=OFF
 
-        - name: Build
-          run: cmake --build build -j
+      - name: Build
+        run: cmake --build build -j
 
-        - name: Install
-          run: sudo cmake --install build --prefix /usr/local
+      - name: Install
+        run: sudo cmake --install build --prefix /usr/local
 
-        - name: Find-package smoke test
-          run: |
-            cat > test.cpp <<'EOF'
-            #include <binparse/parser.hpp>
-            int main(){ return 0; }
-            EOF
-            cat > CMakeLists.txt <<'EOF'
-            cmake_minimum_required(VERSION 3.20)
-            project(smoke LANGUAGES CXX)
-            find_package(binparse CONFIG REQUIRED)
-            add_executable(smoke test.cpp)
-            target_link_libraries(smoke PRIVATE binparse::binparse)
-            EOF
-            cmake -S . -B _t -G Ninja -DCMAKE_BUILD_TYPE=Release -DCMAKE_PREFIX_PATH=/usr/local
-            cmake --build _t -j
+      - name: Find-package smoke test
+        run: |
+          cat > test.cpp <<'EOF'
+          #include <binparse/parser.hpp>
+          int main(){ return 0; }
+          EOF
+          cat > CMakeLists.txt <<'EOF'
+          cmake_minimum_required(VERSION 3.20)
+          project(smoke LANGUAGES CXX)
+          find_package(binparse CONFIG REQUIRED)
+          add_executable(smoke test.cpp)
+          target_link_libraries(smoke PRIVATE binparse::binparse)
+          EOF
+          cmake -S . -B _t -G Ninja -DCMAKE_BUILD_TYPE=Release -DCMAKE_PREFIX_PATH=/usr/local
+          cmake --build _t -j
 
   macos:
     name: macOS (AppleClang + Ninja)
