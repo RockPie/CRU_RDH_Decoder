@@ -7,9 +7,9 @@
 
 namespace bp {
 namespace {
-    constexpr std::size_t kLine = ByteCursor::kLineSize;
-    constexpr std::size_t kLinesPerPacket = LINE_BYTES;
-    constexpr std::size_t kLinesPerHeartbeat = 2;
+    // constexpr std::size_t kLine = ByteCursor::kLineSize;
+    // constexpr std::size_t kLinesPerPacket = LINE_BYTES;
+    // constexpr std::size_t kLinesPerHeartbeat = 2;
 
     inline uint8_t le8_at(std::span<const std::byte> s, std::size_t off) {
         if (off + 1 > s.size()) return 0;
@@ -82,8 +82,7 @@ namespace {
         constexpr std::size_t header_type = 0; // uint8_t
         constexpr std::size_t header_vldb_id = 1; // uint8_t
         constexpr std::size_t bx_cnt = 2; // uint16_t
-        constexpr std::size_t ob_cnt = 4; // uint16_t
-        constexpr std::size_t reserved0 = 6; // uint16_t
+        constexpr std::size_t ob_cnt = 4; // uint32_t
         constexpr std::size_t data_word0 = 8; // uint32_t
         constexpr std::size_t data_word1 = 12; // uint32_t
         constexpr std::size_t data_word2 = 16; // uint32_t
@@ -142,9 +141,8 @@ namespace {
         DataLine r{};
         r.header_type   = le8_at(line, off_data::header_type);
         r.header_vldb_id= le8_at(line, off_data::header_vldb_id);
-        r.bx_cnt        = le16_at(line, off_data::bx_cnt);
-        r.ob_cnt        = le16_at(line, off_data::ob_cnt);
-        r.reserved0     = le16_at(line, off_data::reserved0);
+        r.bx_cnt        = (le16_at(line, off_data::bx_cnt) & 0x0FFF); // 12 bits
+        r.ob_cnt        = le32_at(line, off_data::ob_cnt);
         r.data_word0    = le32_at(line, off_data::data_word0);
         r.data_word1    = le32_at(line, off_data::data_word1);
         r.data_word2    = le32_at(line, off_data::data_word2);
@@ -178,13 +176,13 @@ void StreamParser::feed(std::span<const std::byte> chunk) {
         switch (type) {
         case LineType::RDH_L0: {
             RDH_L0 r = parse_rdh_l0(line);
-            // r.display();
+            r.display();
             if (on_rdh_l0_) on_rdh_l0_(r, line);
             break;
         }
         case LineType::RDH_L1: {
             RDH_L1 r = parse_rdh_l1(line);
-            // r.display();
+            r.display();
             if (on_rdh_l1_) on_rdh_l1_(r, line);
             break;
         }

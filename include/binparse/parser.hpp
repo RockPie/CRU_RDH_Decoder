@@ -31,9 +31,8 @@ struct Heartbeat {
 struct DataLine {
     uint8_t     header_type; // 0xAC
     uint8_t     header_vldb_id;
-    uint16_t    bx_cnt;
-    uint16_t    ob_cnt;
-    uint16_t    reserved0;
+    uint16_t    bx_cnt; // 12 bits
+    uint32_t    ob_cnt;
     uint32_t    data_word0;
     uint32_t    data_word1;
     uint32_t    data_word2;
@@ -47,7 +46,7 @@ struct DataLine {
                   << "\n[DATA] hdr=" << std::setw(2) << (int)header_type
                   << " vldb_id=" << std::setw(2) << (int)header_vldb_id
                   << " bx=" << std::setw(4) << bx_cnt
-                  << " ob=" << std::setw(4) << ob_cnt
+                  << " ob=" << std::setw(8) << ob_cnt
                   << " dw0=" << std::setw(8) << data_word0
                   << " dw1=" << std::setw(8) << data_word1
                   << " dw2=" << std::setw(8) << data_word2
@@ -163,7 +162,7 @@ public:
 
 private:
     enum class State { Idle, CollectPacket };
-    State state_ = State::Idle;
+    // State state_ = State::Idle;
 
     std::vector<std::span<const std::byte>> cur_lines_;
     std::vector<std::span<const std::byte>> hb_lines_;

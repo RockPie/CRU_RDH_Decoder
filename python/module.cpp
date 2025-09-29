@@ -85,9 +85,8 @@ namespace off_L1 {
 namespace off_data {
     constexpr std::size_t header_type        = 0;   // u8
     constexpr std::size_t header_vldb_id     = 1;   // u8
-    constexpr std::size_t bx_cnt             = 2;   // u16
-    constexpr std::size_t ob_cnt             = 4;   // u16
-    constexpr std::size_t reserved0          = 6;   // u16
+    constexpr std::size_t bx_cnt             = 2;   // u16, 12 bits
+    constexpr std::size_t ob_cnt             = 4;   // u32
     constexpr std::size_t data_word0         = 8;   // u32
     constexpr std::size_t data_word1         = 12;  // u32
     constexpr std::size_t data_word2         = 16;  // u32
@@ -149,9 +148,8 @@ static py::dict parse_data_dict(std::span<const std::byte> line) {
     py::dict d;
     d["header_type"]    = le8_at (line, off_data::header_type);
     d["header_vldb_id"] = le8_at (line, off_data::header_vldb_id);
-    d["bx_cnt"]         = le16_at(line, off_data::bx_cnt);
-    d["ob_cnt"]         = le16_at(line, off_data::ob_cnt);
-    d["reserved0"]      = le16_at(line, off_data::reserved0);
+    d["bx_cnt"]         = (le16_at(line, off_data::bx_cnt) & 0x0FFF); // 12 bits
+    d["ob_cnt"]         = le32_at(line, off_data::ob_cnt);
     d["data_word0"]     = le32_at(line, off_data::data_word0);
     d["data_word1"]     = le32_at(line, off_data::data_word1);
     d["data_word2"]     = le32_at(line, off_data::data_word2);
