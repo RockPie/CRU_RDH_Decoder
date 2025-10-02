@@ -42,7 +42,11 @@ int main(int argc, char** argv) {
 
     std::cout << "Reading and parsing file: " << path << std::endl;
 
-    bp::tail_growing_file(path, {}, [&](std::span<const std::byte> chunk) {
+    bp::TailOptions opts;
+    opts.poll_ms = 50;                 // check for new data every 50 ms
+    opts.read_chunk = 1u << 20;        // 1 MB read chunk
+    opts.inactivity_timeout_ms = 5000; // exit if no new data for 5 seconds
+    bp::tail_growing_file(path, opts, [&](std::span<const std::byte> chunk) {
         total_bytes += chunk.size();
 
         // merge with stash to ensure full 40-byte lines

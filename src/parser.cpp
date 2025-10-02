@@ -188,16 +188,14 @@ void StreamParser::feed(std::span<const std::byte> chunk) {
         }
         case LineType::Data: {
             DataLine d = parse_data_line(line);
-            if (d.header_vldb_id == 0x00) {
-                // d.display();
-            }
+            if (on_data_line_) on_data_line_(d, line);
             break;
         }
         case LineType::TRG: {
             // std::cout << "[TRG ]" << std::endl;
             // print in hex
-            TrgLine t = parse_trg_line(line);
-            // t.display();
+            ::bp::TrgLine t = parse_trg_line(line);
+            if (on_trg_line_) on_trg_line_(t, line);
             break;
         }
         default:

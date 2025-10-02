@@ -149,14 +149,18 @@ public:
     using RDH_L0_Cb   = std::function<void(const RDH_L0&, std::span<const std::byte>)>;
     using RDH_L1_Cb   = std::function<void(const RDH_L1&, std::span<const std::byte>)>;
 
+    using DataCb      = std::function<void(const DataLine&, std::span<const std::byte>)>;
+    using TrgLine     = std::function<void(const TrgLine&, std::span<const std::byte>)>;
+
     explicit StreamParser(PacketCb p, HeartbeatCb h, SyncCb s,
-                          RDH_L0_Cb l0_cb = {}, RDH_L1_Cb l1_cb = {})
+                          RDH_L0_Cb l0_cb = {}, RDH_L1_Cb l1_cb = {}, DataCb data_cb = {}, TrgLine trg_cb = {})
         : on_packet_(std::move(p))
         , on_heartbeat_(std::move(h))
         , on_sync_(std::move(s))
         , on_rdh_l0_(std::move(l0_cb))
-        , on_rdh_l1_(std::move(l1_cb)) {}
-
+        , on_rdh_l1_(std::move(l1_cb))
+        , on_data_line_(std::move(data_cb))
+        , on_trg_line_(std::move(trg_cb)) {}
     void feed(std::span<const std::byte> chunk);
 
 private:
@@ -171,6 +175,8 @@ private:
     SyncCb      on_sync_;
     RDH_L0_Cb   on_rdh_l0_;
     RDH_L1_Cb   on_rdh_l1_;
+    DataCb      on_data_line_;
+    TrgLine     on_trg_line_;
 };
 
 } // namespace bp
