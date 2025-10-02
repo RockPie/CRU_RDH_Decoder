@@ -32,7 +32,6 @@ void tail_growing_file(const std::string& path,
             continue;
         }
 
-        // 轮转/截断：inode 变化或 size 回退
         if (st.st_ino != ino || st.st_size < pos) {
             ::close(fd);
             fd = ::open(path.c_str(), O_RDONLY);
@@ -49,7 +48,7 @@ void tail_growing_file(const std::string& path,
             if (n > 0) {
                 pos += n;
                 on_bytes(std::span<const std::byte>(buf.data(), static_cast<std::size_t>(n)));
-                continue; // 立即再试，尽量低延迟追新
+                continue;
             }
         }
 

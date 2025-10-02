@@ -25,7 +25,7 @@ struct ParseError : std::runtime_error {
 
 class ByteCursor {
 public:
-    static constexpr std::size_t kLineSize = LINE_BYTES; // 40 bytes
+    static constexpr std::size_t kLineSize = LINE_BYTES; // 32 bytes
 
     explicit ByteCursor(std::span<const std::byte> buf) noexcept : buf_(buf) {}
 

@@ -21,7 +21,7 @@ enum class LineType : uint16_t {
 };
 
 struct Packet {
-    std::span<const std::byte> block; // 40 行连续视图（1600B）
+    std::span<const std::byte> block;
 };
 
 struct Heartbeat {
@@ -146,8 +146,8 @@ public:
     using PacketCb    = std::function<void(const Packet&)>;
     using HeartbeatCb = std::function<void(const Heartbeat&)>;
     using SyncCb      = std::function<void(std::span<const std::byte>)>;
-    using RDH_L0_Cb  = std::function<void(const RDH_L0&, std::span<const std::byte>)>;
-    using RDH_L1_Cb  = std::function<void(const RDH_L1&, std::span<const std::byte>)>;
+    using RDH_L0_Cb   = std::function<void(const RDH_L0&, std::span<const std::byte>)>;
+    using RDH_L1_Cb   = std::function<void(const RDH_L1&, std::span<const std::byte>)>;
 
     explicit StreamParser(PacketCb p, HeartbeatCb h, SyncCb s,
                           RDH_L0_Cb l0_cb = {}, RDH_L1_Cb l1_cb = {})
@@ -157,7 +157,6 @@ public:
         , on_rdh_l0_(std::move(l0_cb))
         , on_rdh_l1_(std::move(l1_cb)) {}
 
-    // 将任意长度字节（整除 40B 部分）切行并推进状态机
     void feed(std::span<const std::byte> chunk);
 
 private:

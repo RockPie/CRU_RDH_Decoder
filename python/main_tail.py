@@ -6,7 +6,6 @@ import sys
 import time
 from pprint import pprint
 
-# 便于本地开发：把 build/python 放到 sys.path 前面
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "build", "python"))
 
 try:
@@ -18,7 +17,7 @@ except Exception as e:
         "and that the Python version matches the built extension."
     )
 
-LINE_SIZE = 32  # 每行 40 字节
+LINE_SIZE = 32  # 32 bytes per line
 
 def main():
     parser = argparse.ArgumentParser(
@@ -52,7 +51,7 @@ def main():
 
     t0 = time.perf_counter()
     with open(path, "rb") as f, mmap.mmap(f.fileno(), 0, access=mmap.ACCESS_READ) as mm:
-        stats = m.count_types_v3(mm)  # 新版接口，返回 dict
+        stats = m.count_types_v3(mm) 
     t1 = time.perf_counter()
 
     elapsed = t1 - t0
@@ -75,7 +74,7 @@ def main():
                 line = f.read(LINE_SIZE)
                 if not line:
                     break
-                typ, info = m.parse_line(line)  # 返回 (type_str, dict)
+                typ, info = m.parse_line(line)
                 print(f"[{i+1:03d}] Type={typ}")
                 if info:
                     for k, v in info.items():
