@@ -19,24 +19,46 @@ int main(int argc, char** argv) {
     std::size_t n_packets = 0;
     std::size_t n_heartbeats = 0;
     std::size_t n_syncs = 0;
+    std::size_t n_rdh_l0 = 0;
+    std::size_t n_rdh_l1 = 0;
+    std::size_t n_data_lines = 0;
+    std::size_t n_trg_lines = 0;
 
     auto t_start = std::chrono::steady_clock::now();
 
     bp::StreamParser parser(
         /* on_packet */
         [&](const bp::Packet& pkt) {
-            ++n_packets;
-            total_lines += pkt.block.size() / bp::ByteCursor::kLineSize;
+            (void)pkt;
+            n_packets++;
         },
         /* on_heartbeat */
         [&](const bp::Heartbeat&) {
-            ++n_heartbeats;
-            total_lines += 2;
+            n_heartbeats++;
         },
         /* on_sync */
         [&](std::span<const std::byte>) {
-            ++n_syncs;
-            total_lines += 1;
+        },
+        /* on_rdh_l0 */
+        [&](const bp::RDH_L0& rdh, std::span<const std::byte> raw){
+            // use rdh / raw if needed
+            (void)rdh; (void)raw;
+            n_rdh_l0++;
+        },
+        /* on_rdh_l1 */
+        [&](const bp::RDH_L1& rdh, std::span<const std::byte> raw){
+            (void)rdh; (void)raw;
+            n_rdh_l1++;
+        },
+        /* on_data_line */
+        [&](const bp::DataLine& line, std::span<const std::byte> raw){
+            (void)line; (void)raw;
+            n_data_lines++;
+        },
+        /* on_trg_line */
+        [&](const bp::TrgLine& line, std::span<const std::byte> raw){
+            (void)line; (void)raw;
+            n_trg_lines++;
         }
     );
 
@@ -89,6 +111,10 @@ int main(int argc, char** argv) {
     std::cout << "\n\n=== Parsing summary ===\n"
               << "Total bytes read   : " << total_bytes << " bytes\n"
               << "Total lines parsed : " << total_lines << "\n"
+              << "RDH L0 lines detected: " << n_rdh_l0 << "\n"
+              << "RDH L1 lines detected: " << n_rdh_l1 << "\n"
+              << "Data lines detected  : " << n_data_lines << "\n"
+              << "TRG lines detected   : " << n_trg_lines << "\n"
               << "Packets detected   : " << n_packets << "\n"
               << "Heartbeats detected: " << n_heartbeats << "\n"
               << "Sync lines detected: " << n_syncs << "\n"
