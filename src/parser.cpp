@@ -176,13 +176,13 @@ void StreamParser::feed(std::span<const std::byte> chunk) {
         switch (type) {
         case LineType::RDH_L0: {
             RDH_L0 r = parse_rdh_l0(line);
-            r.display();
+            // r.display();
             if (on_rdh_l0_) on_rdh_l0_(r, line);
             break;
         }
         case LineType::RDH_L1: {
             RDH_L1 r = parse_rdh_l1(line);
-            r.display();
+            // r.display();
             if (on_rdh_l1_) on_rdh_l1_(r, line);
             break;
         }
@@ -197,7 +197,7 @@ void StreamParser::feed(std::span<const std::byte> chunk) {
             // std::cout << "[TRG ]" << std::endl;
             // print in hex
             TrgLine t = parse_trg_line(line);
-            t.display();
+            // t.display();
             break;
         }
         default:
